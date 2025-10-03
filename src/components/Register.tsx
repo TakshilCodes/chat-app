@@ -1,19 +1,32 @@
-import { useState } from "react";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { useState, ChangeEvent, FormEvent } from "react";
+import { createUserWithEmailAndPassword, UserCredential } from "firebase/auth";
 import { auth, db } from "../firebase/firebase";
 import { doc, setDoc } from "firebase/firestore";
 import { FaUserPlus } from "react-icons/fa";
 
-const Register = ({ isLogin, setIsLogin }) => {
-    const [isLoading,setIsLoading] = useState(false);
+/** Props */
+interface RegisterProps {
+  isLogin: boolean;
+  setIsLogin: React.Dispatch<React.SetStateAction<boolean>>;
+}
 
-  const [userData, setUserData] = useState({
+/** Local state type for form inputs */
+interface UserData {
+  fullName: string;
+  email: string;
+  password: string;
+}
+
+const Register: React.FC<RegisterProps> = ({ isLogin, setIsLogin }) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [userData, setUserData] = useState<UserData>({
     fullName: "",
     email: "",
     password: "",
   });
 
-  const handleChangeUserData = (e) => {
+  /** Handle input changes */
+  const handleChangeUserData = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setUserData((prev) => ({
       ...prev,
@@ -21,15 +34,18 @@ const Register = ({ isLogin, setIsLogin }) => {
     }));
   };
 
-  const handleAuth = async (e) => {
+  /** Handle register/auth */
+  const handleAuth = async (e: FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+
     try {
-      const userCredential = await createUserWithEmailAndPassword(
+      const userCredential: UserCredential = await createUserWithEmailAndPassword(
         auth,
         userData.email,
         userData.password
       );
+
       const user = userCredential.user;
 
       // Firestore doc in "users" collection
@@ -42,11 +58,10 @@ const Register = ({ isLogin, setIsLogin }) => {
         fullName: userData.fullName,
         image: "",
       });
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error registering user:", err.message);
-    }
-    finally{
-        setIsLoading(false);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -60,13 +75,14 @@ const Register = ({ isLogin, setIsLogin }) => {
         </p>
 
         {/* Form */}
-        <form className="space-y-4">
+        <form className="space-y-4" onSubmit={handleAuth}>
           <input
             name="fullName"
             onChange={handleChangeUserData}
             type="text"
             placeholder="Full Name"
             className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-400"
+            required
           />
           <input
             name="email"
@@ -74,6 +90,7 @@ const Register = ({ isLogin, setIsLogin }) => {
             type="email"
             placeholder="Email"
             className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-400"
+            required
           />
           <input
             name="password"
@@ -81,16 +98,21 @@ const Register = ({ isLogin, setIsLogin }) => {
             type="password"
             placeholder="Password"
             className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-400"
+            required
           />
-          <button disabled={isLoading} onClick={handleAuth} className="bg-[#01aa85] text-white font-bold w-full p-2 rounded-md flex items-center gap-2 justify-center">
-                        {isLoading ? (
-                            <>Processing...</>
-                        ) : (
-                            <>
-                                Register <FaUserPlus />
-                            </>
-                        )}
-                    </button>
+          <button
+            disabled={isLoading}
+            type="submit"
+            className="bg-[#01aa85] text-white font-bold w-full p-2 rounded-md flex items-center gap-2 justify-center"
+          >
+            {isLoading ? (
+              <>Processing...</>
+            ) : (
+              <>
+                Register <FaUserPlus />
+              </>
+            )}
+          </button>
         </form>
 
         {/* Footer */}
