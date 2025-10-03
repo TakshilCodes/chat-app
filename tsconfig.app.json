@@ -1,17 +1,16 @@
 {
   "compilerOptions": {
     "target": "ES2020",
+    "lib": ["ES2020", "DOM"],
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "react-jsx",
-
     "strict": true,
-    "noEmitOnError": false,
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "allowJs": true
+    "allowJs": true,
+    "noEmit": true,
+    "jsx": "react-jsx",          // 👈 this tells TS to allow JSX
+    "types": ["vite/client"]
   },
   "include": ["src"]
 }
